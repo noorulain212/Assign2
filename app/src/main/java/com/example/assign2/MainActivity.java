@@ -69,18 +69,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void searchRestaurant(String query) {
-        ArrayList<Restaurant> filteredList = new ArrayList<>();
-        for (Restaurant restaurant : restaurantList) {
-            if (restaurant.getName().toLowerCase().contains(query.toLowerCase())) {
-                filteredList.add(restaurant);
+        if(query == null || query.isEmpty()){
+            loadRestaurantData();
+        }
+        else{
+            ArrayList<Restaurant> filteredList = new ArrayList<>();
+            for (Restaurant restaurant : restaurantList) {
+                if (restaurant.getName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredList.add(restaurant);
+                }
             }
+
+            if (filteredList.isEmpty()) {
+                Toast.makeText(this, "No results found", Toast.LENGTH_SHORT).show();
+            }
+
+            adapter.updateData(filteredList);
         }
 
-        if (filteredList.isEmpty()) {
-            Toast.makeText(this, "No results found", Toast.LENGTH_SHORT).show();
-        }
-
-        adapter.updateData(filteredList);
     }
 
     private void loadRestaurantData() {
