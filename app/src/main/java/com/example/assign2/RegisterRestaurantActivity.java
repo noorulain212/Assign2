@@ -40,16 +40,25 @@ public class RegisterRestaurantActivity extends AppCompatActivity {
         String description = etDescription.getText().toString();
         String ratings = etRatings.getText().toString();
 
-        if (!name.isEmpty() && !location.isEmpty() && !phone.isEmpty() && !description.isEmpty() && !ratings.isEmpty()) {
-            // Save restaurant data using SharedPreferences
-            SharedPreferences sharedPreferences = getSharedPreferences("restaurant_prefs", MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            String restaurantKey = name + "_" + location; // Unique key for each restaurant
-            editor.putString(restaurantKey, name + "," + location + "," + phone + "," + description + "," + ratings);
-            editor.apply();
 
-            //Toast.makeText(this, "Restaurant saved successfully", Toast.LENGTH_SHORT).show();
-            finish(); // Close activity after saving
+
+        if (!name.isEmpty() && !location.isEmpty() && !phone.isEmpty() && !description.isEmpty() && !ratings.isEmpty()) {
+
+            if(Float.parseFloat(ratings) < 0.0 || Float.parseFloat(ratings) > 5.0){
+                Toast.makeText(this, "Rating must be between 0.0 and 5.0", Toast.LENGTH_SHORT).show();
+
+            }
+            else {
+                // Save restaurant data using SharedPreferences
+                SharedPreferences sharedPreferences = getSharedPreferences("restaurant_prefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                String restaurantKey = name + "_" + location; // Unique key for each restaurant
+                editor.putString(restaurantKey, name + "," + location + "," + phone + "," + description + "," + ratings);
+                editor.apply();
+
+
+                finish(); // Close activity after saving
+            }
         } else {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
         }

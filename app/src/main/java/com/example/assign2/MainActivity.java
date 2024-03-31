@@ -13,7 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,8 +61,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, RegisterRestaurantActivity.class));
-                // Add code here to save restaurant data after adding a new restaurant
-                saveRestaurantData();
+
             }
         });
 
@@ -82,46 +84,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadRestaurantData() {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        Set<String> restaurantSet = sharedPreferences.getStringSet(PREF_KEY_RESTAURANTS, null);
-        if (restaurantSet != null) {
-            for (String restaurantStr : restaurantSet) {
-                String[] restaurantData = restaurantStr.split(",");
-                if (restaurantData.length == 5) {
-                    Restaurant restaurant = new Restaurant(
-                            restaurantData[0],
-                            restaurantData[1],
-                            restaurantData[2],
-                            restaurantData[3],
-                            restaurantData[4]
-                    );
-                    Toast.makeText(this, restaurantData[0], Toast.LENGTH_SHORT).show();
-                    restaurantList.add(restaurant);
-                }
+        SharedPreferences sharedPreferences = getSharedPreferences("restaurant_prefs", MODE_PRIVATE);
+        // Get all keys stored in SharedPreferences
+        Map<String, ?> allRestaurantData = sharedPreferences.getAll();
+        for (Map.Entry<String, ?> entry : allRestaurantData.entrySet()) {
+            String restaurantDataStr = entry.getValue().toString();
+            String[] restaurantData = restaurantDataStr.split(",");
+            if (restaurantData.length == 5) {
+                // Create a new Restaurant object and add it to your list
+                Restaurant restaurant = new Restaurant(
+                        restaurantData[0],
+                        restaurantData[1],
+                        restaurantData[2],
+                        restaurantData[3],
+                        restaurantData[4]
+                );
+                restaurantList.add(restaurant);
+
             }
-            adapter.notifyDataSetChanged(); // Adapter initialized after loading data
-        } else {
-            // Handle case where no data is found in SharedPreferences
         }
+        sortRestaurantListByRatings();
+        // Notify the adapter after loading the data
+
     }
 
 
+    // Inside your MainActivity class
 
-    private void saveRestaurantData() {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        Set<String> restaurantSet = new HashSet<>();
-        for (Restaurant restaurant : restaurantList) {
-            String restaurantStr = restaurant.getName() + "," +
-                    restaurant.getLocation() + "," +
-                    restaurant.getPhone() + "," +
-                    restaurant.getDescription() + "," +
-                    restaurant.getRatings();
-            restaurantSet.add(restaurantStr);
-        }
-        editor.putStringSet(PREF_KEY_RESTAURANTS, restaurantSet);
-        editor.apply();
+    // Method to sort the restaurantList by ratings in descending order
+    private void sortRestaurantListByRatings() {
+        Collections.sort(restaurantList, new Comparator<Restaurant>() {
+            @Override
+            public int compare(Restaurant r1, Restaurant r2) {
+                // Convert ratings to float for comparison
+                float rating1 = Float.parseFloat(r1.getRatings());
+                float rating2 = Float.parseFloat(r2.getRatings());
+                // Compare in descending order
+                return Float.compare(rating2, rating1);
+            }
+        });
+        adapter.notifyDataSetChanged(); // Notify adapter after sorting
     }
+
+
 
 
     @Override
@@ -133,10 +138,6 @@ public class MainActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged(); // Notify adapter after reloading data
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        saveRestaurantData(); // Save data onPause to ensure changes are persisted
-    }
+
 
 }
